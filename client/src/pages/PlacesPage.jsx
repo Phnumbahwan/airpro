@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const PlacesPage = () => {
+    const navigate = useNavigate();
     const { action } = useParams();
     const [title, setTitle] = useState('');
     const [address, setAddress] = useState('');
@@ -13,11 +15,29 @@ const PlacesPage = () => {
     const [checkIn, setCheckIn] = useState('');
     const [checkOut, setCheckOut] = useState('');
     const [maxGuests, setMaxGuests] = useState(1);
+    const [redirect, setRedirect] = useState(null);
 
     const handleAddPhoto = (e) => {
         e.preventDefault();
         setAddedPhotos(prev => [...addedPhotos, photoLink]);
         setPhotoLink('');
+    }
+
+    const handlePerksChange = (e) => {
+        const { checked, name } = e.target;
+        if (checked) {
+            setPerks([...perks, name]);
+        } else {
+            setPerks([...perks.filter((perk) => perk !== name)]);
+        }
+    }
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        // await axios.post('/places', {
+        //     title, address, description, addedPhotos, perks, extraInfo, checkIn, checkOut, maxGuests
+        // });
+        navigate('/account/places');
     }
 
     return (
@@ -37,7 +57,7 @@ const PlacesPage = () => {
             {
                 action === 'new' && (
                     <div>
-                        <form>
+                        <form onSubmit={handleSubmit}>
                             <h2 className="text-2xl mt-4">Title</h2>
                             <p className="text-gray-500 text-sm">Title for your place should be short and catchy as in advertisement</p>
                             <input value={title} onChange={(e) => setTitle(e.target.value)} type="text" placeholder="Title, for example: My lovely apartment" />
@@ -56,15 +76,17 @@ const PlacesPage = () => {
                                 {
                                     addedPhotos.length > 0 && addedPhotos.map((photo) => (
                                         <div>
-                                            <img className="rounded-2xl w-72 h-48" src={photo} />
+                                            <a href={photo} target="_blank ">
+                                                <img className="rounded-2xl w-72 h-48" src={photo} />
+                                            </a>
                                         </div>
                                     ))
                                 }
-                                <button className="flex justify-center items-center gap-1 border bg-transparent rounded-2xl p-8 text-2xl text-gray-600">
+                                <div className="flex justify-center items-center gap-1 border bg-transparent rounded-2xl p-8 text-2xl text-gray-600">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-24">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
                                     </svg>
-                                </button>
+                                </div>
                             </div>
 
                             <h2 className="text-2xl mt-4">Description</h2>
@@ -81,7 +103,7 @@ const PlacesPage = () => {
                                         </svg>
                                         <span>WIFI</span>
                                     </div>
-                                    <input type="checkbox" />
+                                    <input type="checkbox" onChange={handlePerksChange} name="wifi" />
                                 </label>
                                 <label className="border p-4 flex justify-between rounded-2xl gap-2 items-center cursor-pointer">
                                     <div className="flex gap-2">
@@ -90,7 +112,7 @@ const PlacesPage = () => {
                                         </svg>
                                         <span>Free parking spot</span>
                                     </div>
-                                    <input type="checkbox" />
+                                    <input type="checkbox" onChange={handlePerksChange} name="parking" />
                                 </label>
                                 <label className="border p-4 flex justify-between rounded-2xl gap-2 items-center cursor-pointer">
                                     <div className="flex gap-2">
@@ -99,7 +121,7 @@ const PlacesPage = () => {
                                         </svg>
                                         <span>TV</span>
                                     </div>
-                                    <input type="checkbox" />
+                                    <input type="checkbox" onChange={handlePerksChange} name="tv" />
                                 </label>
                                 <label className="border p-4 flex justify-between rounded-2xl gap-2 items-center cursor-pointer">
                                     <div className="flex gap-2">
@@ -108,7 +130,7 @@ const PlacesPage = () => {
                                         </svg>
                                         <span>Netflix</span>
                                     </div>
-                                    <input type="checkbox" />
+                                    <input type="checkbox" onChange={handlePerksChange} name="netflix" />
                                 </label>
                                 <label className="border p-4 flex justify-between rounded-2xl gap-2 items-center cursor-pointer">
                                     <div className="flex gap-2">
@@ -117,7 +139,7 @@ const PlacesPage = () => {
                                         </svg>
                                         <span>Pets</span>
                                     </div>
-                                    <input type="checkbox" />
+                                    <input type="checkbox" onChange={handlePerksChange} name="pets" />
                                 </label>
                                 <label className="border p-4 flex justify-between rounded-2xl gap-2 items-center cursor-pointer">
                                     <div className="flex gap-2">
@@ -126,7 +148,7 @@ const PlacesPage = () => {
                                         </svg>
                                         <span>Entrance</span>
                                     </div>
-                                    <input type="checkbox" />
+                                    <input type="checkbox" onChange={handlePerksChange} name="entrance" />
                                 </label>
                             </div>
 

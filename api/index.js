@@ -7,6 +7,7 @@ const bcrypt = require('bcryptjs');
 const CookieParser = require('cookie-parser');
 const cheerio = require('cheerio');
 const axios = require('axios');
+const Place = require('./models/Place.js');
 require('dotenv').config();
 const app = express();
 const bcryptSalt = bcrypt.genSaltSync(10);
@@ -80,6 +81,31 @@ app.get('/profile', async (req, res) => {
 
 app.post('/logout', async (req, res) => {
     res.cookie('token', '').json(true);
+})
+
+app.post('/places', (req, res) => {
+    const { token } = req.cookies;
+    const { title, address, addedPhotos, description, perks, extraInfo, checkIn, checkOut, maxGuests } = req.body;
+    jwt.verify(token, jwtSecret, {}, async (err, userData) => {
+        if (err) throw err;
+        const place = await Place.create({
+            owner: userData.id,
+            title,
+            address,
+            addedPhotos,
+            description,
+            perks,
+            extraInfo,
+            checkIn,
+            checkOut,
+            maxGuests
+        });
+
+        res.json({
+            status: 'success',
+            data: place
+        });
+    })
 })
 
 // app.get('/csgo', async (req, res) => {
