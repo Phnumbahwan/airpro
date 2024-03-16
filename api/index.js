@@ -49,7 +49,7 @@ app.post('/login', async (req, res) => {
         if (user) {
             const passOk = bcrypt.compareSync(password, user.password)
             if (passOk) {
-                jwt.sign({ email: user.email, password: user._id, name: user.name }, jwtSecret, {}, (err, token) => {
+                jwt.sign({ email: user.email, id: user._id, name: user.name }, jwtSecret, {}, (err, token) => {
                     if (err) throw err;
                     res.cookie('token', token).json({
                         message: 'Login success',
@@ -87,12 +87,13 @@ app.post('/places', (req, res) => {
     const { token } = req.cookies;
     const { title, address, addedPhotos, description, perks, extraInfo, checkIn, checkOut, maxGuests } = req.body;
     jwt.verify(token, jwtSecret, {}, async (err, userData) => {
+        console.log(userData);
         if (err) throw err;
         const place = await Place.create({
             owner: userData.id,
             title,
             address,
-            addedPhotos,
+            photos: addedPhotos,
             description,
             perks,
             extraInfo,
@@ -101,11 +102,22 @@ app.post('/places', (req, res) => {
             maxGuests
         });
 
-        res.json({
-            status: 'success',
-            data: place
-        });
+        res.json(place);
     })
+})
+
+app.get('/places', (req, res) => {
+    const { token } = req.cookies;
+    try {
+        jwt.verify(token, jwtSecret, {}, async (err, userData) => {
+            if (err) throw err;
+            const { id } = userData;
+            const places = await Place.find({ owner: id });
+            res.json(places);
+        })
+    } catch (error) {
+        res.status(422).json(error)
+    }
 })
 
 // app.get('/csgo', async (req, res) => {
