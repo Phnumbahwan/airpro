@@ -8,6 +8,8 @@ const CookieParser = require('cookie-parser');
 const cheerio = require('cheerio');
 const axios = require('axios');
 const Place = require('./models/Place.js');
+const { validationResult } = require('express-validator');
+const PlaceRequest = require('./request/PlaceRequest.js');
 require('dotenv').config();
 const app = express();
 const bcryptSalt = bcrypt.genSaltSync(10);
@@ -83,7 +85,12 @@ app.post('/logout', async (req, res) => {
     res.cookie('token', '').json(true);
 })
 
-app.post('/places', (req, res) => {
+app.post('/places', PlaceRequest, (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     const { token } = req.cookies;
     const { title, address, addedPhotos, description, perks, extraInfo, checkIn, checkOut, maxGuests } = req.body;
     jwt.verify(token, jwtSecret, {}, async (err, userData) => {
@@ -118,6 +125,11 @@ app.get('/places', (req, res) => {
     } catch (error) {
         res.status(422).json(error)
     }
+})
+
+app.get('/places/:id', async (req, res) => {
+    const { id } = req.params;
+    res.json(await Place.findOne({ _id: id }));
 })
 
 // app.get('/csgo', async (req, res) => {
